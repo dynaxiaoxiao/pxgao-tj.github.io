@@ -1,0 +1,13 @@
+baseURL: https://pxgao-tj.github.io/
+languageCode: zh-cn
+title: 某某的研究生笔记
+theme: stack
+
+# 核心路径配置
+params:
+    mainSections:
+        - post
+    featuredImageField: image
+    # 如果你想开启数学公式，加上这两行
+    math:
+        enable: true
