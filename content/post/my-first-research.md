@@ -2,7 +2,7 @@
 title: "深度学习环境配置"
 date: 2026-03-30
 tags: ["深度学习", "环境配置"]
-categories: ["深度学习笔记"]
+categories: ["首页"]
 math: true
 ---
 

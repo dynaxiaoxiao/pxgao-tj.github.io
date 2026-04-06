@@ -13,7 +13,7 @@ params:
         enable: true
     sidebar:
         emoji: 🎓
-        subtitle: "天大数本 | 同济SE硕 | 深度学习 | 多模态大模型"
+        subtitle: "天大数本 | 同济SE硕 | 深度学习 | 大模型 | 图数据挖掘 | 金融风控"
        
     style:
         # 允许用户切换深色/浅色模式
@@ -25,17 +25,21 @@ menu:
     main:
         - identifier: home
           name: 首页
-          url: /
+          url: /categories/首页/
           weight: 1
         - identifier: grad-design
-          name: 毕业设计
-          url: /categories/毕业设计/
+          name: 本科毕业设计
+          url: /categories/本科毕业设计/
           weight: 2
         - identifier: computer-vision
           name: 深度学习
           url: /categories/深度学习/
           weight: 3
+        - identifier: MySql
+          name: 数据库
+          url: /categories/数据库/
+          weight: 4  
         - identifier: about
           name: 关于我
           url: /about/
-          weight: 4        
+          weight: 5       
