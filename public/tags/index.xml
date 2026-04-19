@@ -5,7 +5,13 @@
         <description>Recent content in Tags on 宵的学习笔记</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
-        <lastBuildDate>Mon, 06 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/pxgao-tj.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 19 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/pxgao-tj.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+            <title>毕业设计</title>
+            <link>http://localhost:1313/pxgao-tj.github.io/tags/%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/</link>
+            <pubDate>Sun, 19 Apr 2026 00:00:00 +0000</pubDate>
+            <guid>http://localhost:1313/pxgao-tj.github.io/tags/%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/</guid>
+            <description></description>
+        </item><item>
             <title>MySql</title>
             <link>http://localhost:1313/pxgao-tj.github.io/tags/mysql/</link>
             <pubDate>Mon, 06 Apr 2026 00:00:00 +0000</pubDate>
@@ -22,12 +28,6 @@
             <link>http://localhost:1313/pxgao-tj.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</link>
             <pubDate>Mon, 30 Mar 2026 00:00:00 +0000</pubDate>
             <guid>http://localhost:1313/pxgao-tj.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</guid>
-            <description></description>
-        </item><item>
-            <title>环境配置</title>
-            <link>http://localhost:1313/pxgao-tj.github.io/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</link>
-            <pubDate>Mon, 30 Mar 2026 00:00:00 +0000</pubDate>
-            <guid>http://localhost:1313/pxgao-tj.github.io/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/</guid>
             <description></description>
         </item></channel>
 </rss>

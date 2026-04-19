@@ -3,6 +3,7 @@ title: "sql语句学习"
 date: 2026-04-06
 #image: "cover.jpg"   # 封面图（可选）
 math: true            # 如果有公式，记得开启
+hidden: true
 categories:
     - "数据库"      # 这里填你想划分的板块名
 tags:

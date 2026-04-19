@@ -14,6 +14,9 @@ params:
     sidebar:
         emoji: 🎓
         subtitle: "天大数本 | 同济SE硕 | 深度学习 | 大模型 | 图数据挖掘 | 金融风控"
+        # 添加下面这两行，可以让侧边栏显示文章总数和字数统计，很有成就感
+        articleCount: true
+        wordCount: true
        
     style:
         # 允许用户切换深色/浅色模式
@@ -25,7 +28,7 @@ menu:
     main:
         - identifier: home
           name: 首页
-          url: /categories/首页/
+          url: /
           weight: 1
         - identifier: grad-design
           name: 本科毕业设计
