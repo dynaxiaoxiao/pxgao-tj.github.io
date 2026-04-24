@@ -13,7 +13,7 @@ params:
         enable: true
     sidebar:
         emoji: 🎓
-        subtitle: "天大数本 | 同济SE硕 | 深度学习 | 大模型 | 图数据挖掘 | 金融风控"
+        subtitle: "天大数本 | 同济SE硕 | 大模型算法 | 多模态大模型 | 金融风控"
         # 添加下面这两行，可以让侧边栏显示文章总数和字数统计，很有成就感
         articleCount: true
         wordCount: true
@@ -25,24 +25,32 @@ params:
         accentColor: "#2a7ae2"
 
 menu:
-    main:
-        - identifier: home
-          name: 首页
-          url: /
-          weight: 1
-        - identifier: grad-design
-          name: 本科毕业设计
-          url: /categories/本科毕业设计/
-          weight: 2
-        - identifier: computer-vision
-          name: 深度学习
-          url: /categories/深度学习/
-          weight: 3
-        - identifier: MySql
-          name: 数据库
-          url: /categories/数据库/
-          weight: 4  
-        - identifier: about
-          name: 关于我
-          url: /about/
-          weight: 5       
+  main:
+    - identifier: home
+      name: 首页
+      url: /
+      weight: 1
+    - identifier: computer-vision
+      name: 深度学习
+      url: /categories/深度学习/
+      weight: 2
+    - identifier: large-language-moudel
+      name: 大模型
+      url: /categories/大模型/
+      weight: 3
+    - identifier: grad-design
+      name: 本科毕业设计
+      url: /categories/本科毕业设计/
+      weight: 4
+    - identifier: MySql
+      name: 数据库
+      url: /categories/数据库/
+      weight: 5
+    - identifier: algorithm
+      name: 数据结构算法
+      url: /categories/数据结构算法/
+      weight: 6
+    - identifier: about
+      name: 关于我
+      url: /about/
+      weight: 7

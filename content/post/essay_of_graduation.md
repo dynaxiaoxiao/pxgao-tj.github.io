@@ -1,5 +1,5 @@
 ---
-title: "毕设代码"
+title: "毕设列生成算法代码1.0"
 date: 2026-04-19
 #image: "cover.jpg"   # 封面图（可选）
 math: true            # 如果有公式，记得开启
