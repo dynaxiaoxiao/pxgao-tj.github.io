@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><script src="/pxgao-tj.github.io/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=pxgao-tj.github.io/livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="#C++中定义长度不确定的二维数组 vector&lt;vector&lt;int&gt;&gt; map(m, vector&lt;int&gt;(n, 0)); #重新赋值为全0 map.assign(m, vector&lt;int&gt;(n, 0)); #字符串转数值 int i = std::stoi(&#34;42&#34;); long l = std::stol(&#34;9999999999&#34;); float f = std::stof(&#34;3.14&#34;); double d = std::stod(&#34;2.71828&#34;); #数值转字符串 std::string s1 = std::to_string(42); std::string s2 = std::to_string(3.14159); DFS算法模板 class Solution { public: int m,n; vector&lt;vector&lt;int&gt;&gt; pacificAtlantic(vector&lt;vector&lt;int&gt;&gt;&amp; heights) { m=heights.size(); n=heights[0].size(); vector&lt;vector&lt;int&gt;&gt; map(m,vector&lt;int&gt;(n,0)); vector&lt;vector&lt;int&gt;&gt; map2(m,vector&lt;int&gt;(n,0)); vector&lt;vector&lt;int&gt;&gt; ans; for(int i=0;i&lt;m;i++){ dfs(map,heights,i,0,0); } for(int j=0;j&lt;n;j++){ dfs(map,heights,0,j,0); } for(int i=0;i&lt;m;i++){ dfs(map2,heights,i,n-1,0); } for(int j=0;j&lt;n;j++){ dfs(map2,heights,m-1,j,0); } for(int i=0;i&lt;m;i++){ for(int j=0;j&lt;n;j++){ if(map[i][j]+map2[i][j]==2){ ans.push_back({i,j}); } } } return ans; } void dfs(vector&lt;vector&lt;int&gt;&gt;&amp; map,vector&lt;vector&lt;int&gt;&gt;&amp; heights,int i,int j,int pre){ if(i&lt;0||i&gt;=m||j&lt;0||j&gt;=n||map[i][j]==1)return;//越界 int num =heights[i][j]; if(pre&lt;=num){ map[i][j]=1;//可以 dfs(map,heights,i+1,j,num); dfs(map,heights,i-1,j,num); dfs(map,heights,i,j+1,num); dfs(map,heights,i,j-1,num); } return; } }; BFS算法模板 class Solution { static constexpr int DIRS[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; // 左右上下 public: int nearestExit(vector&lt;vector&lt;char&gt;&gt;&amp; maze, vector&lt;int&gt;&amp; entrance) { int m = maze.size(), n = maze[0].size(); vector vis(m, vector&lt;int8_t&gt;(n)); int sx = entrance[0], sy = entrance[1]; // 起点 vis[sx][sy] = true; // 访问标记 vector&lt;pair&lt;int, int&gt;&gt; q = {{sx, sy}}; for (int ans = 1; !q.empty(); ans++) { auto tmp = q; q.clear(); for (auto&amp; [i, j] : tmp) { // 注意起点不算终点，不能在这里判断 p 是不是终点 for (auto [dx, dy] : DIRS) { // 访问相邻的格子 int x = i + dx, y = j + dy; if (0 &lt;= x &amp;&amp; x &lt; m &amp;&amp; 0 &lt;= y &amp;&amp; y &lt; n &amp;&amp; maze[x][y] == &#39;.&#39; &amp;&amp; !vis[x][y]) { // 之前没有访问过 if (x == 0 || y == 0 || x == m - 1 || y == n - 1) { // 到达终点 return ans; } vis[x][y] = true; // 访问标记 q.emplace_back(x, y); } } } } return -1; // 无法到达终点 } }; 0-1 BFS算法模板 class Solution { static constexpr int DIRS[4][2]={{1,0},{-1,0},{0,-1},{0,1}}; public: int m,n; bool findSafeWalk(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int health) { m=grid.size(); n=grid[0].size(); vector&lt;vector&lt;int&gt;&gt; dis(m,vector&lt;int&gt;(n,INT_MAX)); deque&lt;pair&lt;int,int&gt;&gt; qu; qu.emplace_front(0,0); dis[0][0]=grid[0][0]; while(!qu.empty()){//队列非空，开始bfs auto tmp=qu.front(); qu.pop_front(); int x=tmp.first,y=tmp.second;//队首的横纵坐标 for(auto dir:DIRS){ int x1=x+dir[0],y1=y+dir[1]; if(x1&gt;=0&amp;&amp;x1&lt;m&amp;&amp;y1&gt;=0&amp;&amp;y1&lt;n){ if(dis[x][y]+grid[x1][y1]&lt;dis[x1][y1]){ dis[x1][y1] = dis[x][y]+grid[x1][y1]; grid[x1][y1] == 0? qu.emplace_front(x1,y1):qu.emplace_back(x1,y1); } } } } return dis[m-1][n-1] &lt; health; } }; 前缀和+哈希表 class Solution { public: int subarraySum(vector&lt;int&gt;&amp; nums, int k) { int ans = 0; int n = nums.size(); vector&lt;int&gt; s(n+1); for(int i = 0;i&lt;n;i++){ s[i+1]=s[i]+nums[i]; } unordered_map&lt;int,int&gt; cnt; for(int sj:s){ ans+= cnt.contains(sj-k)?cnt[sj-k]:0; cnt[sj]++; } return ans; } }; 路径总和（前缀和+哈希表一般情况） class Solution { public: int target; int ans; int pathSum(TreeNode* root, int targetSum) { unordered_map&lt;long long,int&gt; cnt={{0,1}}; ans=0; target = targetSum; dfs(root,0,cnt); return ans; } void dfs(TreeNode* root, long long s, unordered_map&lt;long long,int&gt;&amp; cnt){ if(root == nullptr){ return; } s+=root-&gt;val; ans+=cnt.contains(s-target)?cnt[s-target]:0; cnt[s]++; dfs(root-&gt;left,s,cnt); dfs(root-&gt;right,s,cnt); cnt[s]--; return; } }; 电话号码（回溯） class Solution { public: static constexpr string map[10]={&#34;&#34;,&#34;&#34;,&#34;abc&#34;,&#34;def&#34;,&#34;ghi&#34;,&#34;jkl&#34;,&#34;mno&#34;,&#34;pqrs&#34;,&#34;tuv&#34;,&#34;wxyz&#34;}; vector&lt;string&gt; ans; int n; vector&lt;string&gt; letterCombinations(string digits) { n = digits.size(); string str = &#34;&#34;; dfs(0,str,digits); return ans; } void dfs(int i,string str,string digits){ if(i==n){ ans.push_back(str); return; } char ch=digits[i]; int num = ch - &#39;0&#39;; for(char c : map[num]){ string str1=str; str1 += c; dfs(i+1,str1,digits); } return; } }; 递归搜索 + 保存计算结果 =记忆化搜索 Java这样似乎可以存储一个二元组 Queue&lt;int[]&gt; queue = new LinkedList&lt;&gt;(); for(int i = 0; i &lt; m; i++){ for(int j = 0; j &lt; n; j++){ if(grid[i][j] == 2){ //烂的入队列 queue.add(new int[]{i,j}); }else if(grid[i][j] == 1){ count++; } } } 二分查找常用写法 private int lowerBound(int[] nums, int target) { int left = 0, right = nums.length - 1; // 闭区间 [left, right] while (left &lt;= right) { // 区间不为空 // 循环不变量： // nums[left-1] &lt; target // nums[right+1] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid + 1; // 范围缩小到 [mid+1, right] } else { right = mid - 1; // 范围缩小到 [left, mid-1] } } return left; } // 左闭右开区间写法 private int lowerBound2(int[] nums, int target) { int left = 0, right = nums.length; // 左闭右开区间 [left, right) while (left &lt; right) { // 区间不为空 // 循环不变量： // nums[left-1] &lt; target // nums[right] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid + 1; // 范围缩小到 [mid+1, right) } else { right = mid; // 范围缩小到 [left, mid) } } return left; // 返回 left 还是 right 都行，因为循环结束后 left == right } // 开区间写法 private int lowerBound3(int[] nums, int target) { int left = -1, right = nums.length; // 开区间 (left, right) while (left + 1 &lt; right) { // 区间不为空 // 循环不变量： // nums[left] &lt; target // nums[right] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid; // 范围缩小到 (mid, right) } else { right = mid; // 范围缩小到 (left, mid) } } return right; } 合理设计的哈希键能够有效地整合原始信息，找出对于解题有用的结果信息 常见哈希键设计： 在字符串和数组当中，当每个元素的顺序不重要时，可以使用排序后的字符串或数组作为键 如果只关心每个值的偏移量，例如第一个值的偏移量，则可以使用偏移量作为键 在树中，我们通常会用子树的序列化表述作为键 关于HashMap的一些运用 public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) { Map&lt;String, List&lt;String&gt;&gt; map = new HashMap(); List&lt;List&lt;String&gt;&gt; ans; for(String str : strs){ char[] arr = str.toCharArray(); Arrays.sort(arr); String str0 = new String(arr); List&lt;String&gt; list = map.getOrDefault(str0, new ArrayList()); list.add(str); map.put(str0, list); } ans = new ArrayList(map.values()); return ans; } 最小路径问题可以考虑用二维数组dp 单调栈 单调栈是一种特殊的栈结构，它维护了栈内的元素单调性，即元素要么单调递增，要么单调递减。单调栈常用于解决与数组元素的顺序相关的问题，比如找到下一个或上一个更大的元素、计算最大矩形面积等。单调栈的核心思想是利用栈的后进先出（LIFO）特性，以及栈内元素的单调性，来高效地处理问题。 增强for循环似乎比for(i) 循环快/ (第一段代码使用的是增强型for循环（for-each loop），它直接遍历HashSet中的元素。这种循环方式简洁且通常性能较好，因为它直接利用了HashSet的快速查找特性。 第二段代码使用的是传统的for循环（for loop），并且以数组的索引来遍历HashSet。这种方式在性能上通常不如增强型for循环，因为它需要额外的步骤来从数组中获取元素，并且数组的长度可能比HashSet中的元素个数要多，因为HashSet会自动去除重复元素。) 前缀和 构建前缀和数组，以快速计算区间和； 注意在计算区间和的时候，下标有偏移。 单调队列套路 入（元素进入队尾，同时维护队列单调性） 出（元素离开队首） 记录/维护答案（根据队首） 最长递增子序列 class Solution { private int[] nums; private int[] memo; public int lengthOfLIS(int[] nums) { this.nums = nums; int n = nums.length; memo = new int[n]; // 本题可以初始化成 0，表示没有计算过 int ans = 0; for (int i = 0; i &lt; n; i++) { ans = Math.max(ans, dfs(i)); } return ans; } private int dfs(int i) { if (memo[i] &gt; 0) { // 之前计算过 return memo[i]; } for (int j = 0; j &lt; i; j++) { if (nums[j] &lt; nums[i]) { memo[i] = Math.max(memo[i], dfs(j)); } } return ++memo[i]; // 加一提到循环外面 } } 以归并排序的方法，将两个链表合并排序 class Solution { public ListNode sortList(ListNode head) { // 如果链表为空或者只有一个节点，无需排序 if (head == null || head.next == null) { return head; } // 找到中间节点，并断开 head2 与其前一个节点的连接 // 比如 head=[4,2,1,3]，那么 middleNode 调用结束后 head=[4,2] head2=[1,3] ListNode head2 = middleNode(head); // 分治 head = sortList(head); head2 = sortList(head2); // 合并 return mergeTwoLists(head, head2); } // 876. 链表的中间结点（快慢指针） private ListNode middleNode(ListNode head) { ListNode pre = head; ListNode slow = head; ListNode fast = head; while (fast != null &amp;&amp; fast.next != null) { pre = slow; // 记录 slow 的前一个节点 slow = slow.next; fast = fast.next.next; } pre.next = null; // 断开 slow 的前一个节点和 slow 的连接 return slow; } // 21. 合并两个有序链表（双指针） private ListNode mergeTwoLists(ListNode list1, ListNode list2) { ListNode dummy = new ListNode(); // 用哨兵节点简化代码逻辑 ListNode cur = dummy; // cur 指向新链表的末尾 while (list1 != null &amp;&amp; list2 != null) { if (list1.val &lt; list2.val) { cur.next = list1; // 把 list1 加到新链表中 list1 = list1.next; } else { // 注：相等的情况加哪个节点都是可以的 cur.next = list2; // 把 list2 加到新链表中 list2 = list2.next; } cur = cur.next; } cur.next = list1 != null ? list1 : list2; // 拼接剩余链表 return dummy.next; } } 最大乘积子数组的解决 class Solution { public int maxProduct(int[] nums) { int[] fMax = new int[20001]; int[] fMin = new int[20001]; fMax[0] = fMin[0] = nums[0]; for(int i = 1; i &lt; nums.length; i++){ fMax[i] = Math.max(fMax[i - 1]*nums[i], Math.max(fMin[i - 1]*nums[i], nums[i])); fMin[i] = Math.min(fMax[i - 1]*nums[i], Math.min(fMin[i - 1]*nums[i], nums[i])); } int ans = -11; for(int i = 0; i &lt; nums.length; i++){ ans = Math.max(ans, fMax[i]); } return ans; } } 线段树 线段树是一种二叉树，也就是对于一个线段，我们会用一个二叉树来表示。 void bui(int id,int l,int r)//创建线段树,id表示存储下标,区间[L,r] { if(l == r)//左端点等于右端点，即为叶子节点(区间长度为1)，直接赋值即可 { tr[id] = a[l]; return ; } // 否则将当前区间中间拆开成两个区间 int mid = (l + r) / 2;//mid则为中间点，左儿子的结点区间为[l,mid],右儿子的结点区间为[mid + 1,r] bui(id * 2,l,mid); //递归构造左儿子结点 bui(id * 2 + 1,mid + 1,r); //递归构造右儿子结点 // 左右两个区间计算完成以后 // 合并到当前区间 tr[id] = max(tr[id * 2],tr[id * 2 + 1]);//更新父节点 } ">
+<title>力扣算法题小结</title>
+
+
+<link rel="canonical" href="http://localhost:1313/pxgao-tj.github.io/post/algorithm/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap">
+
+
+<link rel="stylesheet" href="/pxgao-tj.github.io/scss/style.min.389e156f5e9bb13df5a924cfa99dfb9c39f3e01e68d9e146cd65bdae963be145.css"><meta property='og:title' content="力扣算法题小结">
+<meta property='og:description' content="#C++中定义长度不确定的二维数组 vector&lt;vector&lt;int&gt;&gt; map(m, vector&lt;int&gt;(n, 0)); #重新赋值为全0 map.assign(m, vector&lt;int&gt;(n, 0)); #字符串转数值 int i = std::stoi(&#34;42&#34;); long l = std::stol(&#34;9999999999&#34;); float f = std::stof(&#34;3.14&#34;); double d = std::stod(&#34;2.71828&#34;); #数值转字符串 std::string s1 = std::to_string(42); std::string s2 = std::to_string(3.14159); DFS算法模板 class Solution { public: int m,n; vector&lt;vector&lt;int&gt;&gt; pacificAtlantic(vector&lt;vector&lt;int&gt;&gt;&amp; heights) { m=heights.size(); n=heights[0].size(); vector&lt;vector&lt;int&gt;&gt; map(m,vector&lt;int&gt;(n,0)); vector&lt;vector&lt;int&gt;&gt; map2(m,vector&lt;int&gt;(n,0)); vector&lt;vector&lt;int&gt;&gt; ans; for(int i=0;i&lt;m;i++){ dfs(map,heights,i,0,0); } for(int j=0;j&lt;n;j++){ dfs(map,heights,0,j,0); } for(int i=0;i&lt;m;i++){ dfs(map2,heights,i,n-1,0); } for(int j=0;j&lt;n;j++){ dfs(map2,heights,m-1,j,0); } for(int i=0;i&lt;m;i++){ for(int j=0;j&lt;n;j++){ if(map[i][j]+map2[i][j]==2){ ans.push_back({i,j}); } } } return ans; } void dfs(vector&lt;vector&lt;int&gt;&gt;&amp; map,vector&lt;vector&lt;int&gt;&gt;&amp; heights,int i,int j,int pre){ if(i&lt;0||i&gt;=m||j&lt;0||j&gt;=n||map[i][j]==1)return;//越界 int num =heights[i][j]; if(pre&lt;=num){ map[i][j]=1;//可以 dfs(map,heights,i+1,j,num); dfs(map,heights,i-1,j,num); dfs(map,heights,i,j+1,num); dfs(map,heights,i,j-1,num); } return; } }; BFS算法模板 class Solution { static constexpr int DIRS[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; // 左右上下 public: int nearestExit(vector&lt;vector&lt;char&gt;&gt;&amp; maze, vector&lt;int&gt;&amp; entrance) { int m = maze.size(), n = maze[0].size(); vector vis(m, vector&lt;int8_t&gt;(n)); int sx = entrance[0], sy = entrance[1]; // 起点 vis[sx][sy] = true; // 访问标记 vector&lt;pair&lt;int, int&gt;&gt; q = {{sx, sy}}; for (int ans = 1; !q.empty(); ans++) { auto tmp = q; q.clear(); for (auto&amp; [i, j] : tmp) { // 注意起点不算终点，不能在这里判断 p 是不是终点 for (auto [dx, dy] : DIRS) { // 访问相邻的格子 int x = i + dx, y = j + dy; if (0 &lt;= x &amp;&amp; x &lt; m &amp;&amp; 0 &lt;= y &amp;&amp; y &lt; n &amp;&amp; maze[x][y] == &#39;.&#39; &amp;&amp; !vis[x][y]) { // 之前没有访问过 if (x == 0 || y == 0 || x == m - 1 || y == n - 1) { // 到达终点 return ans; } vis[x][y] = true; // 访问标记 q.emplace_back(x, y); } } } } return -1; // 无法到达终点 } }; 0-1 BFS算法模板 class Solution { static constexpr int DIRS[4][2]={{1,0},{-1,0},{0,-1},{0,1}}; public: int m,n; bool findSafeWalk(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int health) { m=grid.size(); n=grid[0].size(); vector&lt;vector&lt;int&gt;&gt; dis(m,vector&lt;int&gt;(n,INT_MAX)); deque&lt;pair&lt;int,int&gt;&gt; qu; qu.emplace_front(0,0); dis[0][0]=grid[0][0]; while(!qu.empty()){//队列非空，开始bfs auto tmp=qu.front(); qu.pop_front(); int x=tmp.first,y=tmp.second;//队首的横纵坐标 for(auto dir:DIRS){ int x1=x+dir[0],y1=y+dir[1]; if(x1&gt;=0&amp;&amp;x1&lt;m&amp;&amp;y1&gt;=0&amp;&amp;y1&lt;n){ if(dis[x][y]+grid[x1][y1]&lt;dis[x1][y1]){ dis[x1][y1] = dis[x][y]+grid[x1][y1]; grid[x1][y1] == 0? qu.emplace_front(x1,y1):qu.emplace_back(x1,y1); } } } } return dis[m-1][n-1] &lt; health; } }; 前缀和+哈希表 class Solution { public: int subarraySum(vector&lt;int&gt;&amp; nums, int k) { int ans = 0; int n = nums.size(); vector&lt;int&gt; s(n+1); for(int i = 0;i&lt;n;i++){ s[i+1]=s[i]+nums[i]; } unordered_map&lt;int,int&gt; cnt; for(int sj:s){ ans+= cnt.contains(sj-k)?cnt[sj-k]:0; cnt[sj]++; } return ans; } }; 路径总和（前缀和+哈希表一般情况） class Solution { public: int target; int ans; int pathSum(TreeNode* root, int targetSum) { unordered_map&lt;long long,int&gt; cnt={{0,1}}; ans=0; target = targetSum; dfs(root,0,cnt); return ans; } void dfs(TreeNode* root, long long s, unordered_map&lt;long long,int&gt;&amp; cnt){ if(root == nullptr){ return; } s+=root-&gt;val; ans+=cnt.contains(s-target)?cnt[s-target]:0; cnt[s]++; dfs(root-&gt;left,s,cnt); dfs(root-&gt;right,s,cnt); cnt[s]--; return; } }; 电话号码（回溯） class Solution { public: static constexpr string map[10]={&#34;&#34;,&#34;&#34;,&#34;abc&#34;,&#34;def&#34;,&#34;ghi&#34;,&#34;jkl&#34;,&#34;mno&#34;,&#34;pqrs&#34;,&#34;tuv&#34;,&#34;wxyz&#34;}; vector&lt;string&gt; ans; int n; vector&lt;string&gt; letterCombinations(string digits) { n = digits.size(); string str = &#34;&#34;; dfs(0,str,digits); return ans; } void dfs(int i,string str,string digits){ if(i==n){ ans.push_back(str); return; } char ch=digits[i]; int num = ch - &#39;0&#39;; for(char c : map[num]){ string str1=str; str1 += c; dfs(i+1,str1,digits); } return; } }; 递归搜索 + 保存计算结果 =记忆化搜索 Java这样似乎可以存储一个二元组 Queue&lt;int[]&gt; queue = new LinkedList&lt;&gt;(); for(int i = 0; i &lt; m; i++){ for(int j = 0; j &lt; n; j++){ if(grid[i][j] == 2){ //烂的入队列 queue.add(new int[]{i,j}); }else if(grid[i][j] == 1){ count++; } } } 二分查找常用写法 private int lowerBound(int[] nums, int target) { int left = 0, right = nums.length - 1; // 闭区间 [left, right] while (left &lt;= right) { // 区间不为空 // 循环不变量： // nums[left-1] &lt; target // nums[right+1] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid + 1; // 范围缩小到 [mid+1, right] } else { right = mid - 1; // 范围缩小到 [left, mid-1] } } return left; } // 左闭右开区间写法 private int lowerBound2(int[] nums, int target) { int left = 0, right = nums.length; // 左闭右开区间 [left, right) while (left &lt; right) { // 区间不为空 // 循环不变量： // nums[left-1] &lt; target // nums[right] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid + 1; // 范围缩小到 [mid+1, right) } else { right = mid; // 范围缩小到 [left, mid) } } return left; // 返回 left 还是 right 都行，因为循环结束后 left == right } // 开区间写法 private int lowerBound3(int[] nums, int target) { int left = -1, right = nums.length; // 开区间 (left, right) while (left + 1 &lt; right) { // 区间不为空 // 循环不变量： // nums[left] &lt; target // nums[right] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid; // 范围缩小到 (mid, right) } else { right = mid; // 范围缩小到 (left, mid) } } return right; } 合理设计的哈希键能够有效地整合原始信息，找出对于解题有用的结果信息 常见哈希键设计： 在字符串和数组当中，当每个元素的顺序不重要时，可以使用排序后的字符串或数组作为键 如果只关心每个值的偏移量，例如第一个值的偏移量，则可以使用偏移量作为键 在树中，我们通常会用子树的序列化表述作为键 关于HashMap的一些运用 public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) { Map&lt;String, List&lt;String&gt;&gt; map = new HashMap(); List&lt;List&lt;String&gt;&gt; ans; for(String str : strs){ char[] arr = str.toCharArray(); Arrays.sort(arr); String str0 = new String(arr); List&lt;String&gt; list = map.getOrDefault(str0, new ArrayList()); list.add(str); map.put(str0, list); } ans = new ArrayList(map.values()); return ans; } 最小路径问题可以考虑用二维数组dp 单调栈 单调栈是一种特殊的栈结构，它维护了栈内的元素单调性，即元素要么单调递增，要么单调递减。单调栈常用于解决与数组元素的顺序相关的问题，比如找到下一个或上一个更大的元素、计算最大矩形面积等。单调栈的核心思想是利用栈的后进先出（LIFO）特性，以及栈内元素的单调性，来高效地处理问题。 增强for循环似乎比for(i) 循环快/ (第一段代码使用的是增强型for循环（for-each loop），它直接遍历HashSet中的元素。这种循环方式简洁且通常性能较好，因为它直接利用了HashSet的快速查找特性。 第二段代码使用的是传统的for循环（for loop），并且以数组的索引来遍历HashSet。这种方式在性能上通常不如增强型for循环，因为它需要额外的步骤来从数组中获取元素，并且数组的长度可能比HashSet中的元素个数要多，因为HashSet会自动去除重复元素。) 前缀和 构建前缀和数组，以快速计算区间和； 注意在计算区间和的时候，下标有偏移。 单调队列套路 入（元素进入队尾，同时维护队列单调性） 出（元素离开队首） 记录/维护答案（根据队首） 最长递增子序列 class Solution { private int[] nums; private int[] memo; public int lengthOfLIS(int[] nums) { this.nums = nums; int n = nums.length; memo = new int[n]; // 本题可以初始化成 0，表示没有计算过 int ans = 0; for (int i = 0; i &lt; n; i++) { ans = Math.max(ans, dfs(i)); } return ans; } private int dfs(int i) { if (memo[i] &gt; 0) { // 之前计算过 return memo[i]; } for (int j = 0; j &lt; i; j++) { if (nums[j] &lt; nums[i]) { memo[i] = Math.max(memo[i], dfs(j)); } } return ++memo[i]; // 加一提到循环外面 } } 以归并排序的方法，将两个链表合并排序 class Solution { public ListNode sortList(ListNode head) { // 如果链表为空或者只有一个节点，无需排序 if (head == null || head.next == null) { return head; } // 找到中间节点，并断开 head2 与其前一个节点的连接 // 比如 head=[4,2,1,3]，那么 middleNode 调用结束后 head=[4,2] head2=[1,3] ListNode head2 = middleNode(head); // 分治 head = sortList(head); head2 = sortList(head2); // 合并 return mergeTwoLists(head, head2); } // 876. 链表的中间结点（快慢指针） private ListNode middleNode(ListNode head) { ListNode pre = head; ListNode slow = head; ListNode fast = head; while (fast != null &amp;&amp; fast.next != null) { pre = slow; // 记录 slow 的前一个节点 slow = slow.next; fast = fast.next.next; } pre.next = null; // 断开 slow 的前一个节点和 slow 的连接 return slow; } // 21. 合并两个有序链表（双指针） private ListNode mergeTwoLists(ListNode list1, ListNode list2) { ListNode dummy = new ListNode(); // 用哨兵节点简化代码逻辑 ListNode cur = dummy; // cur 指向新链表的末尾 while (list1 != null &amp;&amp; list2 != null) { if (list1.val &lt; list2.val) { cur.next = list1; // 把 list1 加到新链表中 list1 = list1.next; } else { // 注：相等的情况加哪个节点都是可以的 cur.next = list2; // 把 list2 加到新链表中 list2 = list2.next; } cur = cur.next; } cur.next = list1 != null ? list1 : list2; // 拼接剩余链表 return dummy.next; } } 最大乘积子数组的解决 class Solution { public int maxProduct(int[] nums) { int[] fMax = new int[20001]; int[] fMin = new int[20001]; fMax[0] = fMin[0] = nums[0]; for(int i = 1; i &lt; nums.length; i++){ fMax[i] = Math.max(fMax[i - 1]*nums[i], Math.max(fMin[i - 1]*nums[i], nums[i])); fMin[i] = Math.min(fMax[i - 1]*nums[i], Math.min(fMin[i - 1]*nums[i], nums[i])); } int ans = -11; for(int i = 0; i &lt; nums.length; i++){ ans = Math.max(ans, fMax[i]); } return ans; } } 线段树 线段树是一种二叉树，也就是对于一个线段，我们会用一个二叉树来表示。 void bui(int id,int l,int r)//创建线段树,id表示存储下标,区间[L,r] { if(l == r)//左端点等于右端点，即为叶子节点(区间长度为1)，直接赋值即可 { tr[id] = a[l]; return ; } // 否则将当前区间中间拆开成两个区间 int mid = (l + r) / 2;//mid则为中间点，左儿子的结点区间为[l,mid],右儿子的结点区间为[mid + 1,r] bui(id * 2,l,mid); //递归构造左儿子结点 bui(id * 2 + 1,mid + 1,r); //递归构造右儿子结点 // 左右两个区间计算完成以后 // 合并到当前区间 tr[id] = max(tr[id * 2],tr[id * 2 + 1]);//更新父节点 } ">
+<meta property='og:url' content='http://localhost:1313/pxgao-tj.github.io/post/algorithm/'>
+<meta property='og:site_name' content='宵的学习笔记'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='数据结构算法' /><meta property='article:published_time' content='2026-04-24T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-04-24T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="力扣算法题小结">
+<meta name="twitter:description" content="#C++中定义长度不确定的二维数组 vector&lt;vector&lt;int&gt;&gt; map(m, vector&lt;int&gt;(n, 0)); #重新赋值为全0 map.assign(m, vector&lt;int&gt;(n, 0)); #字符串转数值 int i = std::stoi(&#34;42&#34;); long l = std::stol(&#34;9999999999&#34;); float f = std::stof(&#34;3.14&#34;); double d = std::stod(&#34;2.71828&#34;); #数值转字符串 std::string s1 = std::to_string(42); std::string s2 = std::to_string(3.14159); DFS算法模板 class Solution { public: int m,n; vector&lt;vector&lt;int&gt;&gt; pacificAtlantic(vector&lt;vector&lt;int&gt;&gt;&amp; heights) { m=heights.size(); n=heights[0].size(); vector&lt;vector&lt;int&gt;&gt; map(m,vector&lt;int&gt;(n,0)); vector&lt;vector&lt;int&gt;&gt; map2(m,vector&lt;int&gt;(n,0)); vector&lt;vector&lt;int&gt;&gt; ans; for(int i=0;i&lt;m;i++){ dfs(map,heights,i,0,0); } for(int j=0;j&lt;n;j++){ dfs(map,heights,0,j,0); } for(int i=0;i&lt;m;i++){ dfs(map2,heights,i,n-1,0); } for(int j=0;j&lt;n;j++){ dfs(map2,heights,m-1,j,0); } for(int i=0;i&lt;m;i++){ for(int j=0;j&lt;n;j++){ if(map[i][j]+map2[i][j]==2){ ans.push_back({i,j}); } } } return ans; } void dfs(vector&lt;vector&lt;int&gt;&gt;&amp; map,vector&lt;vector&lt;int&gt;&gt;&amp; heights,int i,int j,int pre){ if(i&lt;0||i&gt;=m||j&lt;0||j&gt;=n||map[i][j]==1)return;//越界 int num =heights[i][j]; if(pre&lt;=num){ map[i][j]=1;//可以 dfs(map,heights,i+1,j,num); dfs(map,heights,i-1,j,num); dfs(map,heights,i,j+1,num); dfs(map,heights,i,j-1,num); } return; } }; BFS算法模板 class Solution { static constexpr int DIRS[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}}; // 左右上下 public: int nearestExit(vector&lt;vector&lt;char&gt;&gt;&amp; maze, vector&lt;int&gt;&amp; entrance) { int m = maze.size(), n = maze[0].size(); vector vis(m, vector&lt;int8_t&gt;(n)); int sx = entrance[0], sy = entrance[1]; // 起点 vis[sx][sy] = true; // 访问标记 vector&lt;pair&lt;int, int&gt;&gt; q = {{sx, sy}}; for (int ans = 1; !q.empty(); ans++) { auto tmp = q; q.clear(); for (auto&amp; [i, j] : tmp) { // 注意起点不算终点，不能在这里判断 p 是不是终点 for (auto [dx, dy] : DIRS) { // 访问相邻的格子 int x = i + dx, y = j + dy; if (0 &lt;= x &amp;&amp; x &lt; m &amp;&amp; 0 &lt;= y &amp;&amp; y &lt; n &amp;&amp; maze[x][y] == &#39;.&#39; &amp;&amp; !vis[x][y]) { // 之前没有访问过 if (x == 0 || y == 0 || x == m - 1 || y == n - 1) { // 到达终点 return ans; } vis[x][y] = true; // 访问标记 q.emplace_back(x, y); } } } } return -1; // 无法到达终点 } }; 0-1 BFS算法模板 class Solution { static constexpr int DIRS[4][2]={{1,0},{-1,0},{0,-1},{0,1}}; public: int m,n; bool findSafeWalk(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int health) { m=grid.size(); n=grid[0].size(); vector&lt;vector&lt;int&gt;&gt; dis(m,vector&lt;int&gt;(n,INT_MAX)); deque&lt;pair&lt;int,int&gt;&gt; qu; qu.emplace_front(0,0); dis[0][0]=grid[0][0]; while(!qu.empty()){//队列非空，开始bfs auto tmp=qu.front(); qu.pop_front(); int x=tmp.first,y=tmp.second;//队首的横纵坐标 for(auto dir:DIRS){ int x1=x+dir[0],y1=y+dir[1]; if(x1&gt;=0&amp;&amp;x1&lt;m&amp;&amp;y1&gt;=0&amp;&amp;y1&lt;n){ if(dis[x][y]+grid[x1][y1]&lt;dis[x1][y1]){ dis[x1][y1] = dis[x][y]+grid[x1][y1]; grid[x1][y1] == 0? qu.emplace_front(x1,y1):qu.emplace_back(x1,y1); } } } } return dis[m-1][n-1] &lt; health; } }; 前缀和+哈希表 class Solution { public: int subarraySum(vector&lt;int&gt;&amp; nums, int k) { int ans = 0; int n = nums.size(); vector&lt;int&gt; s(n+1); for(int i = 0;i&lt;n;i++){ s[i+1]=s[i]+nums[i]; } unordered_map&lt;int,int&gt; cnt; for(int sj:s){ ans+= cnt.contains(sj-k)?cnt[sj-k]:0; cnt[sj]++; } return ans; } }; 路径总和（前缀和+哈希表一般情况） class Solution { public: int target; int ans; int pathSum(TreeNode* root, int targetSum) { unordered_map&lt;long long,int&gt; cnt={{0,1}}; ans=0; target = targetSum; dfs(root,0,cnt); return ans; } void dfs(TreeNode* root, long long s, unordered_map&lt;long long,int&gt;&amp; cnt){ if(root == nullptr){ return; } s+=root-&gt;val; ans+=cnt.contains(s-target)?cnt[s-target]:0; cnt[s]++; dfs(root-&gt;left,s,cnt); dfs(root-&gt;right,s,cnt); cnt[s]--; return; } }; 电话号码（回溯） class Solution { public: static constexpr string map[10]={&#34;&#34;,&#34;&#34;,&#34;abc&#34;,&#34;def&#34;,&#34;ghi&#34;,&#34;jkl&#34;,&#34;mno&#34;,&#34;pqrs&#34;,&#34;tuv&#34;,&#34;wxyz&#34;}; vector&lt;string&gt; ans; int n; vector&lt;string&gt; letterCombinations(string digits) { n = digits.size(); string str = &#34;&#34;; dfs(0,str,digits); return ans; } void dfs(int i,string str,string digits){ if(i==n){ ans.push_back(str); return; } char ch=digits[i]; int num = ch - &#39;0&#39;; for(char c : map[num]){ string str1=str; str1 += c; dfs(i+1,str1,digits); } return; } }; 递归搜索 + 保存计算结果 =记忆化搜索 Java这样似乎可以存储一个二元组 Queue&lt;int[]&gt; queue = new LinkedList&lt;&gt;(); for(int i = 0; i &lt; m; i++){ for(int j = 0; j &lt; n; j++){ if(grid[i][j] == 2){ //烂的入队列 queue.add(new int[]{i,j}); }else if(grid[i][j] == 1){ count++; } } } 二分查找常用写法 private int lowerBound(int[] nums, int target) { int left = 0, right = nums.length - 1; // 闭区间 [left, right] while (left &lt;= right) { // 区间不为空 // 循环不变量： // nums[left-1] &lt; target // nums[right+1] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid + 1; // 范围缩小到 [mid+1, right] } else { right = mid - 1; // 范围缩小到 [left, mid-1] } } return left; } // 左闭右开区间写法 private int lowerBound2(int[] nums, int target) { int left = 0, right = nums.length; // 左闭右开区间 [left, right) while (left &lt; right) { // 区间不为空 // 循环不变量： // nums[left-1] &lt; target // nums[right] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid + 1; // 范围缩小到 [mid+1, right) } else { right = mid; // 范围缩小到 [left, mid) } } return left; // 返回 left 还是 right 都行，因为循环结束后 left == right } // 开区间写法 private int lowerBound3(int[] nums, int target) { int left = -1, right = nums.length; // 开区间 (left, right) while (left + 1 &lt; right) { // 区间不为空 // 循环不变量： // nums[left] &lt; target // nums[right] &gt;= target int mid = left + (right - left) / 2; if (nums[mid] &lt; target) { left = mid; // 范围缩小到 (mid, right) } else { right = mid; // 范围缩小到 (left, mid) } } return right; } 合理设计的哈希键能够有效地整合原始信息，找出对于解题有用的结果信息 常见哈希键设计： 在字符串和数组当中，当每个元素的顺序不重要时，可以使用排序后的字符串或数组作为键 如果只关心每个值的偏移量，例如第一个值的偏移量，则可以使用偏移量作为键 在树中，我们通常会用子树的序列化表述作为键 关于HashMap的一些运用 public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) { Map&lt;String, List&lt;String&gt;&gt; map = new HashMap(); List&lt;List&lt;String&gt;&gt; ans; for(String str : strs){ char[] arr = str.toCharArray(); Arrays.sort(arr); String str0 = new String(arr); List&lt;String&gt; list = map.getOrDefault(str0, new ArrayList()); list.add(str); map.put(str0, list); } ans = new ArrayList(map.values()); return ans; } 最小路径问题可以考虑用二维数组dp 单调栈 单调栈是一种特殊的栈结构，它维护了栈内的元素单调性，即元素要么单调递增，要么单调递减。单调栈常用于解决与数组元素的顺序相关的问题，比如找到下一个或上一个更大的元素、计算最大矩形面积等。单调栈的核心思想是利用栈的后进先出（LIFO）特性，以及栈内元素的单调性，来高效地处理问题。 增强for循环似乎比for(i) 循环快/ (第一段代码使用的是增强型for循环（for-each loop），它直接遍历HashSet中的元素。这种循环方式简洁且通常性能较好，因为它直接利用了HashSet的快速查找特性。 第二段代码使用的是传统的for循环（for loop），并且以数组的索引来遍历HashSet。这种方式在性能上通常不如增强型for循环，因为它需要额外的步骤来从数组中获取元素，并且数组的长度可能比HashSet中的元素个数要多，因为HashSet会自动去除重复元素。) 前缀和 构建前缀和数组，以快速计算区间和； 注意在计算区间和的时候，下标有偏移。 单调队列套路 入（元素进入队尾，同时维护队列单调性） 出（元素离开队首） 记录/维护答案（根据队首） 最长递增子序列 class Solution { private int[] nums; private int[] memo; public int lengthOfLIS(int[] nums) { this.nums = nums; int n = nums.length; memo = new int[n]; // 本题可以初始化成 0，表示没有计算过 int ans = 0; for (int i = 0; i &lt; n; i++) { ans = Math.max(ans, dfs(i)); } return ans; } private int dfs(int i) { if (memo[i] &gt; 0) { // 之前计算过 return memo[i]; } for (int j = 0; j &lt; i; j++) { if (nums[j] &lt; nums[i]) { memo[i] = Math.max(memo[i], dfs(j)); } } return ++memo[i]; // 加一提到循环外面 } } 以归并排序的方法，将两个链表合并排序 class Solution { public ListNode sortList(ListNode head) { // 如果链表为空或者只有一个节点，无需排序 if (head == null || head.next == null) { return head; } // 找到中间节点，并断开 head2 与其前一个节点的连接 // 比如 head=[4,2,1,3]，那么 middleNode 调用结束后 head=[4,2] head2=[1,3] ListNode head2 = middleNode(head); // 分治 head = sortList(head); head2 = sortList(head2); // 合并 return mergeTwoLists(head, head2); } // 876. 链表的中间结点（快慢指针） private ListNode middleNode(ListNode head) { ListNode pre = head; ListNode slow = head; ListNode fast = head; while (fast != null &amp;&amp; fast.next != null) { pre = slow; // 记录 slow 的前一个节点 slow = slow.next; fast = fast.next.next; } pre.next = null; // 断开 slow 的前一个节点和 slow 的连接 return slow; } // 21. 合并两个有序链表（双指针） private ListNode mergeTwoLists(ListNode list1, ListNode list2) { ListNode dummy = new ListNode(); // 用哨兵节点简化代码逻辑 ListNode cur = dummy; // cur 指向新链表的末尾 while (list1 != null &amp;&amp; list2 != null) { if (list1.val &lt; list2.val) { cur.next = list1; // 把 list1 加到新链表中 list1 = list1.next; } else { // 注：相等的情况加哪个节点都是可以的 cur.next = list2; // 把 list2 加到新链表中 list2 = list2.next; } cur = cur.next; } cur.next = list1 != null ? list1 : list2; // 拼接剩余链表 return dummy.next; } } 最大乘积子数组的解决 class Solution { public int maxProduct(int[] nums) { int[] fMax = new int[20001]; int[] fMin = new int[20001]; fMax[0] = fMin[0] = nums[0]; for(int i = 1; i &lt; nums.length; i++){ fMax[i] = Math.max(fMax[i - 1]*nums[i], Math.max(fMin[i - 1]*nums[i], nums[i])); fMin[i] = Math.min(fMax[i - 1]*nums[i], Math.min(fMin[i - 1]*nums[i], nums[i])); } int ans = -11; for(int i = 0; i &lt; nums.length; i++){ ans = Math.max(ans, fMax[i]); } return ans; } } 线段树 线段树是一种二叉树，也就是对于一个线段，我们会用一个二叉树来表示。 void bui(int id,int l,int r)//创建线段树,id表示存储下标,区间[L,r] { if(l == r)//左端点等于右端点，即为叶子节点(区间长度为1)，直接赋值即可 { tr[id] = a[l]; return ; } // 否则将当前区间中间拆开成两个区间 int mid = (l + r) / 2;//mid则为中间点，左儿子的结点区间为[l,mid],右儿子的结点区间为[mid + 1,r] bui(id * 2,l,mid); //递归构造左儿子结点 bui(id * 2 + 1,mid + 1,r); //递归构造右儿子结点 // 左右两个区间计算完成以后 // 合并到当前区间 tr[id] = max(tr[id * 2],tr[id * 2 + 1]);//更新父节点 } ">
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column compact"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/pxgao-tj.github.io/">宵的学习笔记</a></h1>
+            <h2 class="site-description">天大数本 | 同济SE硕 | 大模型算法 | 多模态大模型 | 金融风控</h2>
+        </div>
+    </header><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/pxgao-tj.github.io/' >
+                
+                <span>首页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/pxgao-tj.github.io/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/' >
+                
+                <span>深度学习</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/pxgao-tj.github.io/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/' >
+                
+                <span>大模型</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/pxgao-tj.github.io/categories/%E6%9C%AC%E7%A7%91%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/' >
+                
+                <span>本科毕业设计</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/pxgao-tj.github.io/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/' >
+                
+                <span>数据库</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/pxgao-tj.github.io/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AE%97%E6%B3%95/' >
+                
+                <span>数据结构算法</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/pxgao-tj.github.io/about/' >
+                
+                <span>关于我</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+            
+            
+            <a href="/pxgao-tj.github.io/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AE%97%E6%B3%95/" style="background-color: hsl(340, 60%, 84%); color: hsl(340, 60%, 15%);">
+                数据结构算法
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/pxgao-tj.github.io/post/algorithm/">力扣算法题小结</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    
+    
+    
+    <footer class="article-meta">
+        
+            <div class="inline-meta">
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                    <time class="article-time--published" datetime='2026-04-24T00:00:00Z'>Friday, April 24, 2026</time>
+                
+
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                    <time class="article-time--reading">
+                        6 minutes read
+                    </time>
+                
+            </div>
+        
+
+        
+
+        
+    </footer>
+    
+</div>
+
+</header>
+
+    
+
+    <section class="article-content">
+    
+    
+    <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#C++中定义长度不确定的二维数组
+</span></span></span><span style="display:flex;"><span> vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> map(m, vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(n, <span style="color:#ae81ff">0</span>));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#重新赋值为全0
+</span></span></span><span style="display:flex;"><span>map.assign(m, vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(n, <span style="color:#ae81ff">0</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#字符串转数值
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stoi(<span style="color:#e6db74">&#34;42&#34;</span>);          
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">long</span> l <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stol(<span style="color:#e6db74">&#34;9999999999&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">float</span> f <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stof(<span style="color:#e6db74">&#34;3.14&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span> d <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>stod(<span style="color:#e6db74">&#34;2.71828&#34;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#数值转字符串
+</span></span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string s1 <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>to_string(<span style="color:#ae81ff">42</span>);      
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string s2 <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>to_string(<span style="color:#ae81ff">3.14159</span>); 
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>DFS算法模板
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> m,n;
+</span></span><span style="display:flex;"><span>    vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> pacificAtlantic(vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;&amp;</span> heights) {
+</span></span><span style="display:flex;"><span>        m<span style="color:#f92672">=</span>heights.size();
+</span></span><span style="display:flex;"><span>        n<span style="color:#f92672">=</span>heights[<span style="color:#ae81ff">0</span>].size();
+</span></span><span style="display:flex;"><span>        vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> map(m,vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(n,<span style="color:#ae81ff">0</span>));
+</span></span><span style="display:flex;"><span>        vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> map2(m,vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(n,<span style="color:#ae81ff">0</span>));
+</span></span><span style="display:flex;"><span>        vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> ans;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>m;i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            dfs(map,heights,i,<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;j<span style="color:#f92672">&lt;</span>n;j<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            dfs(map,heights,<span style="color:#ae81ff">0</span>,j,<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>m;i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            dfs(map2,heights,i,n<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;j<span style="color:#f92672">&lt;</span>n;j<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            dfs(map2,heights,m<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,j,<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>m;i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;j<span style="color:#f92672">&lt;</span>n;j<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(map[i][j]<span style="color:#f92672">+</span>map2[i][j]<span style="color:#f92672">==</span><span style="color:#ae81ff">2</span>){
+</span></span><span style="display:flex;"><span>                    ans.push_back({i,j});
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">dfs</span>(vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;&amp;</span> map,vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;&amp;</span> heights,<span style="color:#66d9ef">int</span> i,<span style="color:#66d9ef">int</span> j,<span style="color:#66d9ef">int</span> pre){
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span>(i<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">0</span><span style="color:#f92672">||</span>i<span style="color:#f92672">&gt;=</span>m<span style="color:#f92672">||</span>j<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">0</span><span style="color:#f92672">||</span>j<span style="color:#f92672">&gt;=</span>n<span style="color:#f92672">||</span>map[i][j]<span style="color:#f92672">==</span><span style="color:#ae81ff">1</span>)<span style="color:#66d9ef">return</span>;<span style="color:#75715e">//越界
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> num <span style="color:#f92672">=</span>heights[i][j];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span>(pre<span style="color:#f92672">&lt;=</span>num){
+</span></span><span style="display:flex;"><span>            map[i][j]<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;<span style="color:#75715e">//可以
+</span></span></span><span style="display:flex;"><span>            dfs(map,heights,i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>,j,num);
+</span></span><span style="display:flex;"><span>            dfs(map,heights,i<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,j,num);
+</span></span><span style="display:flex;"><span>            dfs(map,heights,i,j<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>,num);
+</span></span><span style="display:flex;"><span>            dfs(map,heights,i,j<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,num);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>BFS算法模板
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> DIRS[<span style="color:#ae81ff">4</span>][<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> {{<span style="color:#ae81ff">0</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>}, {<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>}, {<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>}, {<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>}}; <span style="color:#75715e">// 左右上下
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> nearestExit(vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">char</span><span style="color:#f92672">&gt;&gt;&amp;</span> maze, vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&amp;</span> entrance) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> m <span style="color:#f92672">=</span> maze.size(), n <span style="color:#f92672">=</span> maze[<span style="color:#ae81ff">0</span>].size();
+</span></span><span style="display:flex;"><span>        vector <span style="color:#a6e22e">vis</span>(m, vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int8_t</span><span style="color:#f92672">&gt;</span>(n));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> sx <span style="color:#f92672">=</span> entrance[<span style="color:#ae81ff">0</span>], sy <span style="color:#f92672">=</span> entrance[<span style="color:#ae81ff">1</span>]; <span style="color:#75715e">// 起点
+</span></span></span><span style="display:flex;"><span>        vis[sx][sy] <span style="color:#f92672">=</span> true; <span style="color:#75715e">// 访问标记
+</span></span></span><span style="display:flex;"><span>        vector<span style="color:#f92672">&lt;</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> q <span style="color:#f92672">=</span> {{sx, sy}};
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> ans <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; <span style="color:#f92672">!</span>q.empty(); ans<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">auto</span> tmp <span style="color:#f92672">=</span> q;
+</span></span><span style="display:flex;"><span>            q.clear();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> [i, j] <span style="color:#f92672">:</span> tmp) {
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// 注意起点不算终点，不能在这里判断 p 是不是终点
+</span></span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">auto</span> [dx, dy] <span style="color:#f92672">:</span> DIRS) { <span style="color:#75715e">// 访问相邻的格子
+</span></span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">int</span> x <span style="color:#f92672">=</span> i <span style="color:#f92672">+</span> dx, y <span style="color:#f92672">=</span> j <span style="color:#f92672">+</span> dy;
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (<span style="color:#ae81ff">0</span> <span style="color:#f92672">&lt;=</span> x <span style="color:#f92672">&amp;&amp;</span> x <span style="color:#f92672">&lt;</span> m <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&lt;=</span> y <span style="color:#f92672">&amp;&amp;</span> y <span style="color:#f92672">&lt;</span> n <span style="color:#f92672">&amp;&amp;</span> maze[x][y] <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">!</span>vis[x][y]) { <span style="color:#75715e">// 之前没有访问过
+</span></span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">if</span> (x <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> y <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">||</span> x <span style="color:#f92672">==</span> m <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">||</span> y <span style="color:#f92672">==</span> n <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>) { <span style="color:#75715e">// 到达终点
+</span></span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                        vis[x][y] <span style="color:#f92672">=</span> true; <span style="color:#75715e">// 访问标记
+</span></span></span><span style="display:flex;"><span>                        q.emplace_back(x, y);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>; <span style="color:#75715e">// 无法到达终点
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span> BFS算法模板
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> <span style="color:#66d9ef">int</span> DIRS[<span style="color:#ae81ff">4</span>][<span style="color:#ae81ff">2</span>]<span style="color:#f92672">=</span>{{<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">0</span>},{<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">0</span>},{<span style="color:#ae81ff">0</span>,<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>},{<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">1</span>}};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> m,n;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">findSafeWalk</span>(vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;&amp;</span> grid, <span style="color:#66d9ef">int</span> health) {
+</span></span><span style="display:flex;"><span>        m<span style="color:#f92672">=</span>grid.size();
+</span></span><span style="display:flex;"><span>        n<span style="color:#f92672">=</span>grid[<span style="color:#ae81ff">0</span>].size();
+</span></span><span style="display:flex;"><span>        vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> dis(m,vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(n,INT_MAX));
+</span></span><span style="display:flex;"><span>        deque<span style="color:#f92672">&lt;</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> qu;
+</span></span><span style="display:flex;"><span>        qu.emplace_front(<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>        dis[<span style="color:#ae81ff">0</span>][<span style="color:#ae81ff">0</span>]<span style="color:#f92672">=</span>grid[<span style="color:#ae81ff">0</span>][<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span>(<span style="color:#f92672">!</span>qu.empty()){<span style="color:#75715e">//队列非空，开始bfs
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">auto</span> tmp<span style="color:#f92672">=</span>qu.front();
+</span></span><span style="display:flex;"><span>            qu.pop_front();
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> x<span style="color:#f92672">=</span>tmp.first,y<span style="color:#f92672">=</span>tmp.second;<span style="color:#75715e">//队首的横纵坐标
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> dir:DIRS){
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">int</span> x1<span style="color:#f92672">=</span>x<span style="color:#f92672">+</span>dir[<span style="color:#ae81ff">0</span>],y1<span style="color:#f92672">=</span>y<span style="color:#f92672">+</span>dir[<span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span>(x1<span style="color:#f92672">&gt;=</span><span style="color:#ae81ff">0</span><span style="color:#f92672">&amp;&amp;</span>x1<span style="color:#f92672">&lt;</span>m<span style="color:#f92672">&amp;&amp;</span>y1<span style="color:#f92672">&gt;=</span><span style="color:#ae81ff">0</span><span style="color:#f92672">&amp;&amp;</span>y1<span style="color:#f92672">&lt;</span>n){
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span>(dis[x][y]<span style="color:#f92672">+</span>grid[x1][y1]<span style="color:#f92672">&lt;</span>dis[x1][y1]){
+</span></span><span style="display:flex;"><span>                        dis[x1][y1] <span style="color:#f92672">=</span> dis[x][y]<span style="color:#f92672">+</span>grid[x1][y1];
+</span></span><span style="display:flex;"><span>                        grid[x1][y1] <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">?</span> qu.emplace_front(x1,y1)<span style="color:#f92672">:</span>qu.emplace_back(x1,y1);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> dis[m<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>][n<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">&lt;</span> health;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">前缀和</span><span style="color:#f92672">+</span><span style="color:#960050;background-color:#1e0010">哈希表</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> subarraySum(vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&amp;</span> nums, <span style="color:#66d9ef">int</span> k) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> ans <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> nums.size();
+</span></span><span style="display:flex;"><span>        vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> s(n<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>n;i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            s[i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">=</span>s[i]<span style="color:#f92672">+</span>nums[i];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        unordered_map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> cnt;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> sj:s){
+</span></span><span style="display:flex;"><span>            ans<span style="color:#f92672">+=</span> cnt.contains(sj<span style="color:#f92672">-</span>k)<span style="color:#f92672">?</span>cnt[sj<span style="color:#f92672">-</span>k]<span style="color:#f92672">:</span><span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>            cnt[sj]<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">路径总和（前缀和</span><span style="color:#f92672">+</span><span style="color:#960050;background-color:#1e0010">哈希表一般情况）</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> target;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> ans;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">pathSum</span>(TreeNode<span style="color:#f92672">*</span> root, <span style="color:#66d9ef">int</span> targetSum) {
+</span></span><span style="display:flex;"><span>        unordered_map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span>,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> cnt<span style="color:#f92672">=</span>{{<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">1</span>}};
+</span></span><span style="display:flex;"><span>        ans<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        target <span style="color:#f92672">=</span> targetSum;
+</span></span><span style="display:flex;"><span>        dfs(root,<span style="color:#ae81ff">0</span>,cnt);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">dfs</span>(TreeNode<span style="color:#f92672">*</span> root, <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> s, unordered_map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span>,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&amp;</span> cnt){
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span>(root <span style="color:#f92672">==</span> <span style="color:#66d9ef">nullptr</span>){
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        s<span style="color:#f92672">+=</span>root<span style="color:#f92672">-&gt;</span>val;
+</span></span><span style="display:flex;"><span>        ans<span style="color:#f92672">+=</span>cnt.contains(s<span style="color:#f92672">-</span>target)<span style="color:#f92672">?</span>cnt[s<span style="color:#f92672">-</span>target]<span style="color:#f92672">:</span><span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        cnt[s]<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>        dfs(root<span style="color:#f92672">-&gt;</span>left,s,cnt);
+</span></span><span style="display:flex;"><span>        dfs(root<span style="color:#f92672">-&gt;</span>right,s,cnt);
+</span></span><span style="display:flex;"><span>        cnt[s]<span style="color:#f92672">--</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">电话号码（回溯）</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">constexpr</span> string map[<span style="color:#ae81ff">10</span>]<span style="color:#f92672">=</span>{<span style="color:#e6db74">&#34;&#34;</span>,<span style="color:#e6db74">&#34;&#34;</span>,<span style="color:#e6db74">&#34;abc&#34;</span>,<span style="color:#e6db74">&#34;def&#34;</span>,<span style="color:#e6db74">&#34;ghi&#34;</span>,<span style="color:#e6db74">&#34;jkl&#34;</span>,<span style="color:#e6db74">&#34;mno&#34;</span>,<span style="color:#e6db74">&#34;pqrs&#34;</span>,<span style="color:#e6db74">&#34;tuv&#34;</span>,<span style="color:#e6db74">&#34;wxyz&#34;</span>};
+</span></span><span style="display:flex;"><span>    vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> ans;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> n;
+</span></span><span style="display:flex;"><span>    vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> letterCombinations(string digits) {
+</span></span><span style="display:flex;"><span>        n <span style="color:#f92672">=</span> digits.size();
+</span></span><span style="display:flex;"><span>        string str <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>;
+</span></span><span style="display:flex;"><span>        dfs(<span style="color:#ae81ff">0</span>,str,digits);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">dfs</span>(<span style="color:#66d9ef">int</span> i,string str,string digits){
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span>(i<span style="color:#f92672">==</span>n){
+</span></span><span style="display:flex;"><span>            ans.push_back(str);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">char</span> ch<span style="color:#f92672">=</span>digits[i];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> num <span style="color:#f92672">=</span> ch <span style="color:#f92672">-</span> <span style="color:#e6db74">&#39;0&#39;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">char</span> c : map[num]){
+</span></span><span style="display:flex;"><span>            string str1<span style="color:#f92672">=</span>str;
+</span></span><span style="display:flex;"><span>            str1 <span style="color:#f92672">+=</span> c;
+</span></span><span style="display:flex;"><span>            dfs(i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>,str1,digits);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">递归搜索</span> <span style="color:#f92672">+</span> <span style="color:#960050;background-color:#1e0010">保存计算结果</span> <span style="color:#f92672">=</span><span style="color:#960050;background-color:#1e0010">记忆化搜索</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Java这样似乎可以存储一个二元组
+</span></span><span style="display:flex;"><span>Queue<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>[]<span style="color:#f92672">&gt;</span> queue <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> LinkedList<span style="color:#f92672">&lt;&gt;</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> m; i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> n; j<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span>(grid[i][j] <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>){ <span style="color:#75715e">//烂的入队列
+</span></span></span><span style="display:flex;"><span>                queue.add(<span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[]{i,j});
+</span></span><span style="display:flex;"><span>            }<span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span>(grid[i][j] <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>){
+</span></span><span style="display:flex;"><span>                count<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>          }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">二分查找常用写法</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">lowerBound</span>(<span style="color:#66d9ef">int</span>[] nums, <span style="color:#66d9ef">int</span> target) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> left <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, right <span style="color:#f92672">=</span> nums.length <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; <span style="color:#75715e">// 闭区间 [left, right]
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (left <span style="color:#f92672">&lt;=</span> right) { <span style="color:#75715e">// 区间不为空
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// 循环不变量：
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// nums[left-1] &lt; target
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// nums[right+1] &gt;= target
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> mid <span style="color:#f92672">=</span> left <span style="color:#f92672">+</span> (right <span style="color:#f92672">-</span> left) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (nums[mid] <span style="color:#f92672">&lt;</span> target) {
+</span></span><span style="display:flex;"><span>                left <span style="color:#f92672">=</span> mid <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>; <span style="color:#75715e">// 范围缩小到 [mid+1, right]
+</span></span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                right <span style="color:#f92672">=</span> mid <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>; <span style="color:#75715e">// 范围缩小到 [left, mid-1]
+</span></span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> left;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 左闭右开区间写法
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">lowerBound2</span>(<span style="color:#66d9ef">int</span>[] nums, <span style="color:#66d9ef">int</span> target) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> left <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>, right <span style="color:#f92672">=</span> nums.length; <span style="color:#75715e">// 左闭右开区间 [left, right)
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (left <span style="color:#f92672">&lt;</span> right) { <span style="color:#75715e">// 区间不为空
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// 循环不变量：
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// nums[left-1] &lt; target
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// nums[right] &gt;= target
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> mid <span style="color:#f92672">=</span> left <span style="color:#f92672">+</span> (right <span style="color:#f92672">-</span> left) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (nums[mid] <span style="color:#f92672">&lt;</span> target) {
+</span></span><span style="display:flex;"><span>                left <span style="color:#f92672">=</span> mid <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>; <span style="color:#75715e">// 范围缩小到 [mid+1, right)
+</span></span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                right <span style="color:#f92672">=</span> mid; <span style="color:#75715e">// 范围缩小到 [left, mid)
+</span></span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> left; <span style="color:#75715e">// 返回 left 还是 right 都行，因为循环结束后 left == right
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 开区间写法
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">lowerBound3</span>(<span style="color:#66d9ef">int</span>[] nums, <span style="color:#66d9ef">int</span> target) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> left <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>, right <span style="color:#f92672">=</span> nums.length; <span style="color:#75715e">// 开区间 (left, right)
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (left <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span> <span style="color:#f92672">&lt;</span> right) { <span style="color:#75715e">// 区间不为空
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// 循环不变量：
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// nums[left] &lt; target
+</span></span></span><span style="display:flex;"><span>            <span style="color:#75715e">// nums[right] &gt;= target
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> mid <span style="color:#f92672">=</span> left <span style="color:#f92672">+</span> (right <span style="color:#f92672">-</span> left) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (nums[mid] <span style="color:#f92672">&lt;</span> target) {
+</span></span><span style="display:flex;"><span>                left <span style="color:#f92672">=</span> mid; <span style="color:#75715e">// 范围缩小到 (mid, right)
+</span></span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                right <span style="color:#f92672">=</span> mid; <span style="color:#75715e">// 范围缩小到 (left, mid)
+</span></span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> right;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">合理设计的哈希键能够有效地整合原始信息，找出对于解题有用的结果信息</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">常见哈希键设计：</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">在字符串和数组当中，当每个元素的顺序不重要时，可以使用排序后的字符串或数组作为键</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">如果只关心每个值的偏移量，例如第一个值的偏移量，则可以使用偏移量作为键</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">在树中，我们通常会用子树的序列化表述作为键</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">关于</span>HashMap的一些运用
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> List<span style="color:#f92672">&lt;</span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;&gt;</span> groupAnagrams(String[] strs) {
+</span></span><span style="display:flex;"><span>        Map<span style="color:#f92672">&lt;</span>String, List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;&gt;</span> map <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> HashMap();
+</span></span><span style="display:flex;"><span>        List<span style="color:#f92672">&lt;</span>List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;&gt;</span> ans;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(String str : strs){
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">char</span>[] arr <span style="color:#f92672">=</span> str.toCharArray();
+</span></span><span style="display:flex;"><span>            Arrays.sort(arr);
+</span></span><span style="display:flex;"><span>            String str0 <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> String(arr);
+</span></span><span style="display:flex;"><span>            List<span style="color:#f92672">&lt;</span>String<span style="color:#f92672">&gt;</span> list <span style="color:#f92672">=</span> map.getOrDefault(str0, <span style="color:#66d9ef">new</span> ArrayList());
+</span></span><span style="display:flex;"><span>            list.add(str);
+</span></span><span style="display:flex;"><span>            map.put(str0, list);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        ans <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ArrayList(map.values());
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">最小路径问题可以考虑用二维数组</span>dp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">单调栈</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">单调栈是一种特殊的栈结构，它维护了栈内的元素单调性，即元素要么单调递增，要么单调递减。单调栈常用于解决与数组元素的顺序相关的问题，比如找到下一个或上一个更大的元素、计算最大矩形面积等。单调栈的核心思想是利用栈的后进先出（</span>LIFO<span style="color:#960050;background-color:#1e0010">）特性，以及栈内元素的单调性，来高效地处理问题。</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">增强</span>for循环似乎比for(i) <span style="color:#960050;background-color:#1e0010">循环快</span><span style="color:#f92672">/</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#960050;background-color:#1e0010">第一段代码使用的是增强型</span>for循环<span style="color:#960050;background-color:#1e0010">（</span><span style="color:#66d9ef">for</span><span style="color:#f92672">-</span>each loop<span style="color:#960050;background-color:#1e0010">），它直接遍历</span>HashSet中的元素<span style="color:#960050;background-color:#1e0010">。这种循环方式简洁且通常性能较好，因为它直接利用了</span>HashSet的快速查找特性<span style="color:#960050;background-color:#1e0010">。</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">第二段代码使用的是传统的</span>for循环<span style="color:#960050;background-color:#1e0010">（</span><span style="color:#66d9ef">for</span> loop<span style="color:#960050;background-color:#1e0010">），并且以数组的索引来遍历</span>HashSet<span style="color:#960050;background-color:#1e0010">。这种方式在性能上通常不如增强型</span>for循环<span style="color:#960050;background-color:#1e0010">，因为它需要额外的步骤来从数组中获取元素，并且数组的长度可能比</span>HashSet中的元素个数要多<span style="color:#960050;background-color:#1e0010">，因为</span>HashSet会自动去除重复元素<span style="color:#960050;background-color:#1e0010">。</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">前缀和</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">构建前缀和数组，以快速计算区间和；</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">注意在计算区间和的时候，下标有偏移。</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">单调队列套路</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">入（元素进入队尾，同时维护队列单调性）</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">出（元素离开队首）</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">记录</span><span style="color:#f92672">/</span><span style="color:#960050;background-color:#1e0010">维护答案（根据队首）</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">最长递增子序列</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span>[] nums;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span>[] memo;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">lengthOfLIS</span>(<span style="color:#66d9ef">int</span>[] nums) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">this</span>.nums <span style="color:#f92672">=</span> nums;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> nums.length;
+</span></span><span style="display:flex;"><span>        memo <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[n]; <span style="color:#75715e">// 本题可以初始化成 0，表示没有计算过
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> ans <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> n; i<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            ans <span style="color:#f92672">=</span> Math.max(ans, dfs(i));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">dfs</span>(<span style="color:#66d9ef">int</span> i) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (memo[i] <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) { <span style="color:#75715e">// 之前计算过
+</span></span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> memo[i];
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> i; j<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (nums[j] <span style="color:#f92672">&lt;</span> nums[i]) {
+</span></span><span style="display:flex;"><span>                memo[i] <span style="color:#f92672">=</span> Math.max(memo[i], dfs(j));
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">++</span>memo[i]; <span style="color:#75715e">// 加一提到循环外面
+</span></span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">以归并排序的方法，将两个链表合并排序</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> ListNode <span style="color:#a6e22e">sortList</span>(ListNode head) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 如果链表为空或者只有一个节点，无需排序
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (head <span style="color:#f92672">==</span> null <span style="color:#f92672">||</span> head.next <span style="color:#f92672">==</span> null) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> head;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 找到中间节点，并断开 head2 与其前一个节点的连接
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 比如 head=[4,2,1,3]，那么 middleNode 调用结束后 head=[4,2] head2=[1,3]
+</span></span></span><span style="display:flex;"><span>        ListNode head2 <span style="color:#f92672">=</span> middleNode(head);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 分治
+</span></span></span><span style="display:flex;"><span>        head <span style="color:#f92672">=</span> sortList(head);
+</span></span><span style="display:flex;"><span>        head2 <span style="color:#f92672">=</span> sortList(head2);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// 合并
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> mergeTwoLists(head, head2);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 876. 链表的中间结点（快慢指针）
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> ListNode <span style="color:#a6e22e">middleNode</span>(ListNode head) {
+</span></span><span style="display:flex;"><span>        ListNode pre <span style="color:#f92672">=</span> head;
+</span></span><span style="display:flex;"><span>        ListNode slow <span style="color:#f92672">=</span> head;
+</span></span><span style="display:flex;"><span>        ListNode fast <span style="color:#f92672">=</span> head;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (fast <span style="color:#f92672">!=</span> null <span style="color:#f92672">&amp;&amp;</span> fast.next <span style="color:#f92672">!=</span> null) {
+</span></span><span style="display:flex;"><span>            pre <span style="color:#f92672">=</span> slow; <span style="color:#75715e">// 记录 slow 的前一个节点
+</span></span></span><span style="display:flex;"><span>            slow <span style="color:#f92672">=</span> slow.next;
+</span></span><span style="display:flex;"><span>            fast <span style="color:#f92672">=</span> fast.next.next;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        pre.next <span style="color:#f92672">=</span> null; <span style="color:#75715e">// 断开 slow 的前一个节点和 slow 的连接
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> slow;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 21. 合并两个有序链表（双指针）
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> ListNode <span style="color:#a6e22e">mergeTwoLists</span>(ListNode list1, ListNode list2) {
+</span></span><span style="display:flex;"><span>        ListNode dummy <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> ListNode(); <span style="color:#75715e">// 用哨兵节点简化代码逻辑
+</span></span></span><span style="display:flex;"><span>        ListNode cur <span style="color:#f92672">=</span> dummy; <span style="color:#75715e">// cur 指向新链表的末尾
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (list1 <span style="color:#f92672">!=</span> null <span style="color:#f92672">&amp;&amp;</span> list2 <span style="color:#f92672">!=</span> null) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (list1.val <span style="color:#f92672">&lt;</span> list2.val) {
+</span></span><span style="display:flex;"><span>                cur.next <span style="color:#f92672">=</span> list1; <span style="color:#75715e">// 把 list1 加到新链表中
+</span></span></span><span style="display:flex;"><span>                list1 <span style="color:#f92672">=</span> list1.next;
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> { <span style="color:#75715e">// 注：相等的情况加哪个节点都是可以的
+</span></span></span><span style="display:flex;"><span>                cur.next <span style="color:#f92672">=</span> list2; <span style="color:#75715e">// 把 list2 加到新链表中
+</span></span></span><span style="display:flex;"><span>                list2 <span style="color:#f92672">=</span> list2.next;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            cur <span style="color:#f92672">=</span> cur.next;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        cur.next <span style="color:#f92672">=</span> list1 <span style="color:#f92672">!=</span> null <span style="color:#f92672">?</span> list1 : list2; <span style="color:#75715e">// 拼接剩余链表
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> dummy.next;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">最大乘积子数组的解决</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Solution</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">maxProduct</span>(<span style="color:#66d9ef">int</span>[] nums) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span>[] fMax <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[<span style="color:#ae81ff">20001</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span>[] fMin <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[<span style="color:#ae81ff">20001</span>];
+</span></span><span style="display:flex;"><span>        fMax[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> fMin[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> nums[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&lt;</span> nums.length; i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            fMax[i] <span style="color:#f92672">=</span> Math.max(fMax[i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]<span style="color:#f92672">*</span>nums[i], Math.max(fMin[i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]<span style="color:#f92672">*</span>nums[i], nums[i]));
+</span></span><span style="display:flex;"><span>            fMin[i] <span style="color:#f92672">=</span> Math.min(fMax[i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]<span style="color:#f92672">*</span>nums[i], Math.min(fMin[i <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>]<span style="color:#f92672">*</span>nums[i], nums[i]));
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">int</span> ans <span style="color:#f92672">=</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">11</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> nums.length; i<span style="color:#f92672">++</span>){
+</span></span><span style="display:flex;"><span>            ans <span style="color:#f92672">=</span> Math.max(ans, fMax[i]);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> ans;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">线段树</span>
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">线段树是一种二叉树，也就是对于一个线段，我们会用一个二叉树来表示。</span>
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> bui(<span style="color:#66d9ef">int</span> id,<span style="color:#66d9ef">int</span> l,<span style="color:#66d9ef">int</span> r)<span style="color:#75715e">//创建线段树,id表示存储下标,区间[L,r]
+</span></span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span>(l <span style="color:#f92672">==</span> r)<span style="color:#75715e">//左端点等于右端点，即为叶子节点(区间长度为1)，直接赋值即可
+</span></span></span><span style="display:flex;"><span>  {
+</span></span><span style="display:flex;"><span>    tr[id] <span style="color:#f92672">=</span> a[l];
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> ;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 否则将当前区间中间拆开成两个区间
+</span></span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">int</span> mid <span style="color:#f92672">=</span> (l <span style="color:#f92672">+</span> r) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>;<span style="color:#75715e">//mid则为中间点，左儿子的结点区间为[l,mid],右儿子的结点区间为[mid + 1,r]
+</span></span></span><span style="display:flex;"><span>  bui(id <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>,l,mid); <span style="color:#75715e">//递归构造左儿子结点
+</span></span></span><span style="display:flex;"><span>  bui(id <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>,mid <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>,r); <span style="color:#75715e">//递归构造右儿子结点
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 左右两个区间计算完成以后
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 合并到当前区间
+</span></span></span><span style="display:flex;"><span>  tr[id] <span style="color:#f92672">=</span> max(tr[id <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>],tr[id <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>]);<span style="color:#75715e">//更新父节点
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</section>
+
+
+    <footer class="article-meta article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/pxgao-tj.github.io/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AE%97%E6%B3%95/">数据结构算法</a>
+        
+    </section>
+
+
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        const elementsToRender = [".main-article", ".widget--toc"];
+
+        elementsToRender.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                renderMathInElement(element, {
+                    delimiters: [
+                        { left: "$$", right: "$$", display: true },
+                        { left: "$", right: "$", display: false },
+                        { left: "\\(", right: "\\)", display: false },
+                        { left: "\\[", right: "\\]", display: true }
+                    ],
+                    ignoredClasses: ["gist"]
+                });
+            }
+        });
+    });
+</script>
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+        <div class="disqus-container">
+    
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+        2026 宵的学习笔记
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="4.0.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+
+
+
+<script type="module">
+    import gallery from '\/pxgao-tj.github.io\/ts\/gallery.js';
+
+    const articleContent = document.querySelector('.article-content');
+    const shouldLoad = articleContent && (articleContent.querySelectorAll('figure').length > 0 || articleContent.querySelectorAll('img.gallery-image').length > 0);
+    
+    if (shouldLoad) {
+        gallery(articleContent);
+
+        const PhotoSwipeLightbox = (await import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe-lightbox.esm.min.js")).default;
+        const styleHref = "https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.css";
+
+        const styleTag = document.createElement('link');
+        styleTag.rel = 'stylesheet';
+        styleTag.href = styleHref;
+        document.head.appendChild(styleTag);
+
+        const lightbox = new PhotoSwipeLightbox({
+            gallerySelector: '.article-content',
+            childSelector: 'figure a.image-link',
+            pswpModule: () => import("https:\/\/cdn.jsdelivr.net\/npm\/photoswipe@5.4.4\/dist\/photoswipe.esm.min.js")
+        });
+        lightbox.init();
+    }
+</script>
+    
+
+            </main>
+        </div>
+        
+<script type="text/javascript" src="/pxgao-tj.github.io/ts/main.2cb6a0a2b938867a2becc47eac4f7bb229ea463f0babf52b449386add98314c7.js" defer></script>
+
+
+    </body>
+</html>
